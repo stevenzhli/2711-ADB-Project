@@ -1,6 +1,14 @@
 import pandas as pd
 import sqlalchemy as sql
 
+def extract_unique(df,field_name):
+    """
+    extract unique values in a dataframe field to a sorted list
+    """
+    out = df[field_name].unique().tolist()
+    out.sort()
+    return out
+
 def get_mysql_data(uname,pwd):
     hostname="localhost"
     port="3307" # default 3306, using 3307 for the db hosted in vm
