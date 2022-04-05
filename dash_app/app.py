@@ -2,11 +2,11 @@ from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from server import app
 from views.time import time_view
-# from views.demogr import demogr_view
+from views.demogr import demogr_view
 
 # styling options
 card_style = {
-    "padding": "2rem 2rem",
+    "padding": "1rem 2rem",
 }
 
 # page header
@@ -59,8 +59,8 @@ app.layout = dbc.Container([
 def render_content(value):
     if value == 'time':
         return time_view
-    # elif value == 'demogr':
-    #     return demogr_view
+    elif value == 'demogr':
+        return demogr_view
 
 if __name__ == '__main__':
     app.run_server()

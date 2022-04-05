@@ -1,7 +1,51 @@
 import json, math
-import plotly.express as px, plotly.graph_objects as go
+import plotly.express as px
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
+
+def gen_demogr_bar(df, dims, metric):
+    # get non-empty dimensions
+    real_dims = [i for i in dims if i]
+    n_dims = len(real_dims)
+    # groupby
+    df_tmp = df.groupby(real_dims).sum().reset_index()
+    # calculate if rate metrics
+    if metric[-4:] == 'rate':
+        match metric:
+            case 'case_death_rate':
+                df_tmp[metric] = df_tmp.out_death/df_tmp.out_total
+            case 'case_severe_rate':
+                df_tmp[metric] = df_tmp.out_severe/df_tmp.out_total
+            case 'severe_death_rate':
+                df_tmp[metric] = df_tmp.out_death/df_tmp.out_severe
+    # generate plot
+    if n_dims == 1:
+        fig = px.bar(
+            data_frame=df_tmp,
+            y=real_dims[0],
+            x=metric,
+            barmode='group'
+        )
+    elif n_dims == 2:
+        fig = px.bar(
+            data_frame=df_tmp,
+            y=real_dims[0],
+            x=metric,
+            color=real_dims[1],
+            barmode='group'
+        )
+    elif n_dims == 3:
+        fig = px.bar(
+            data_frame=df_tmp,
+            y=real_dims[0],
+            x=metric,
+            color=real_dims[1],
+            facet_col=real_dims[2],
+            barmode='group'
+        )
+    fig.update_layout(xaxis_title=None,margin=dict(l=10,r=10,t=50,b=10))
+    return fig
 
 def gen_state_map(df,metric,month):
     '''
@@ -20,12 +64,12 @@ def gen_state_map(df,metric,month):
         color_continuous_scale=px.colors.sequential.Oranges,
         range_color=(0,upper),
         scope='usa',
-        title="US:"+metric[1],
+        title="US "+metric[1],
         labels={metric[0]:''},
         hover_name='state',
         hover_data={metric[0]:True,'month':False,'state':False}
     )
-    fig.update_layout(title=dict(xanchor='center',x=0.5))
+    fig.update_layout(title=dict(xanchor='center',x=0.5),margin=dict(l=10,r=10,t=50,b=10))
     # fig.write_json(os.path.join('assets','plot','state_map.json'))
     return fig
 
@@ -51,7 +95,7 @@ def gen_county_map(df,state,state_id,metric,month):
         geojson=area,
         color=metric[0],
         color_continuous_scale=px.colors.sequential.Oranges,
-        title=state+":"+metric[1],
+        title=state+" "+metric[1],
         range_color=(0,upper),
         scope='usa',
         fitbounds='locations',
@@ -59,7 +103,8 @@ def gen_county_map(df,state,state_id,metric,month):
         hover_name='county',
         hover_data={metric[0]:True,'month':False,'county_id':False}
     )
-    fig.update_layout(title=dict(xanchor='center',x=0.5))
+    fig.update_layout(title=dict(xanchor='center',x=0.5),margin=dict(l=10,r=10,t=50,b=10))
+
     # fig.write_json(os.path.join('assets','plot','state'+state_id+'.json'))
     return fig
 
@@ -107,7 +152,8 @@ def __double_y_time_plot(df, time, location, metrics):
         ),
         yaxis=dict(
             autorange=True
-        )
+        ),
+        margin=dict(l=10,r=10,t=50,b=10)
     )
     if(len(metrics)==1):
         return fig

@@ -1,6 +1,5 @@
 from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
-import plotly.express as px
 # modules
 from server import app
 from model.mysql import df_s,df_c
@@ -42,7 +41,7 @@ card_time_series = dbc.Card([
     dbc.Row([
         # state selector
         dbc.Col([
-            html.Div('State'),
+            html.B('location'),
             dcc.Dropdown(
                 id='dpdn-state-select',
                 options=[{'label':k,'value':k} for k in ls_states],
@@ -50,8 +49,9 @@ card_time_series = dbc.Card([
             )
         ]),
         # metric 1 selector
+        html.H4('Time series plot'),
         dbc.Col([
-            html.Div('Metric1'),
+            html.Div('metric 1 (blue line)'),
             dcc.Dropdown(
                 id='dpdn-metric1-select',
                 options=[{'label':k,'value':k} for k in dc_metrics.keys()],
@@ -60,7 +60,7 @@ card_time_series = dbc.Card([
         ]),
         # metric 2 selector
         dbc.Col([
-            html.Div('Metric2'),
+            html.Div('metric 2 (red dash)'),
             dcc.Dropdown(
                 id='dpdn-metric2-select',
                 options=[{'label':k,'value':k} for k in dc_metrics.keys()],
@@ -71,6 +71,7 @@ card_time_series = dbc.Card([
     dcc.Graph(id='fig-time-series'),
     html.P(),
     dbc.Row([
+        html.H4('Choropleth plot'),
         dbc.Col([
             html.Div("Time "),
             dcc.Slider(
@@ -84,7 +85,7 @@ card_time_series = dbc.Card([
             ),
         ]),
         dbc.Col([
-            html.Div('Metric '),
+            html.Div('metric for maps '),
             dcc.Dropdown(
                 id='dpdn-metric3-select',
                 options=[{'label':k,'value':k} for k in dc_metrics.keys()],
@@ -100,7 +101,7 @@ card_time_series = dbc.Card([
             dcc.Graph(id='fig-county-map')
         ]),
     ]),
-], style={'padding': '1rem 1rem'} )
+], style={'padding': '1rem 2rem'} )
 
 # states and county map plot
 card_map = dbc.Card([
