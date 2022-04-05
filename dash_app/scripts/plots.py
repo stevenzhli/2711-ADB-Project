@@ -3,26 +3,24 @@ import plotly.express as px, plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 
-def gen_state_map(df,metric):
+def gen_state_map(df,metric,month):
     '''
     generate state level map
     metric: list of the metric's [colname, tag name in plot]
     '''
-    # convert to string and sort for slider
-    df.month = df.month.astype(str)
-    df = df.sort_values(by="month",ignore_index=True)
     # ensure fixed upper bound
     upper = df[df['state']!='US'][metric[0]].max()
+    # filter by month
+    df_tmp = df[df.month==month]
     fig = px.choropleth(
-        df,
+        df_tmp,
         locations='state',
         locationmode='USA-states',
         color=metric[0],
         color_continuous_scale=px.colors.sequential.Oranges,
-        animation_frame="month",
         range_color=(0,upper),
         scope='usa',
-        title=metric[1],
+        title="US:"+metric[1],
         labels={metric[0]:''},
         hover_name='state',
         hover_data={metric[0]:True,'month':False,'state':False}
@@ -31,7 +29,7 @@ def gen_state_map(df,metric):
     # fig.write_json(os.path.join('assets','plot','state_map.json'))
     return fig
 
-def gen_county_map(df,state_id,metric):
+def gen_county_map(df,state,state_id,metric,month):
     '''
     generate county level map of given state_id
     metric: list of the metric's [colname, tag name in plot]
@@ -40,11 +38,10 @@ def gen_county_map(df,state_id,metric):
         return go.Figure()
     # filter by state_id
     df_tmp = df[df.state_id==state_id]
-    # convert month to string and sort for slider
-    df_tmp.month = df_tmp.month.astype(str)
-    df_tmp = df_tmp.sort_values(by="month",ignore_index=True)
     # ensure fixed upper bound
     upper = df_tmp[metric[0]].max()
+    # filter by month
+    df_tmp = df_tmp[df_tmp.month==month]
 
     # get county level geojson
     area = json.load(open(os.path.join('assets','geojson',str(state_id).zfill(2)+'.json')))
@@ -54,8 +51,7 @@ def gen_county_map(df,state_id,metric):
         geojson=area,
         color=metric[0],
         color_continuous_scale=px.colors.sequential.Oranges,
-        animation_frame="month",
-        title=metric[1],
+        title=state+":"+metric[1],
         range_color=(0,upper),
         scope='usa',
         fitbounds='locations',
@@ -102,12 +98,17 @@ def __double_y_time_plot(df, time, location, metrics):
         secondary_y=False
     )
     # place legend at top
-    fig.update_layout(legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="auto"
-    ))
+    fig.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="auto"
+        ),
+        yaxis=dict(
+            autorange=True
+        )
+    )
     if(len(metrics)==1):
         return fig
     else:

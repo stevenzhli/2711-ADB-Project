@@ -1,9 +1,8 @@
 def extract_unique(df,field_name):
     '''
-    extract unique values in a dataframe field to a sorted list
+    extract unique values in a dataframe field to a list
     '''
     out = df[field_name].unique().tolist()
-    out.sort()
     return out
 
 def extract_dict(df,field_names):
@@ -12,7 +11,12 @@ def extract_dict(df,field_names):
     '''
     return dict(zip(df[field_names[0]],df[field_names[1]]))
 
-def calc_upper(number):
-    '''
-    find an upper upper bound for plotting
-    '''
+def slice_dict_n(dict,n):
+    '''select every nth element from a dictionary'''
+    i = 1
+    out = {}
+    for k in dict.keys():
+        if i%n == 1:
+            out[dict[k]] = dict.get(k)
+        i+=1
+    return out

@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from server import app
 from views.time import time_view
-# from views.demo import demo_view
+# from views.demogr import demogr_view
 
 # styling options
 card_style = {
@@ -31,7 +31,7 @@ card_page_header = dbc.Card([
                 id='main-plot-view',
                 options=[
                     {'label':'Time-Location','value':'time'},
-                    {'label':'Demography','value':'demo'},
+                    {'label':'Demography','value':'demogr'},
                 ], value=1 # default to time-location dimension
             )
         ])
@@ -59,8 +59,8 @@ app.layout = dbc.Container([
 def render_content(value):
     if value == 'time':
         return time_view
-    # elif value == 'demo':
-    #     return demo_view
+    # elif value == 'demogr':
+    #     return demogr_view
 
 if __name__ == '__main__':
     app.run_server()

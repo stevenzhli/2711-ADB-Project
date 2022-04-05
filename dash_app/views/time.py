@@ -1,22 +1,21 @@
 from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
-import plotly.io
-from sklearn import metrics
+# modules
 from server import app
-from scripts.utils import extract_dict
 from model.mysql import df_s,df_c
+from scripts.utils import *
 from scripts.plots import *
 
 #### UI OPTIONS ####
 
 # extract state abbr and id
-state_ids = extract_dict(df_s,['state','state_id'])
+dc_state_ids = extract_dict(df_s,['state','state_id'])
 # state abbrs include the US tag, which should be at top
-all_states = sorted(state_ids.keys())
-all_states.insert(0, all_states.pop(all_states.index('US')))
+ls_states = sorted(dc_state_ids.keys())
+ls_states.insert(0, ls_states.pop(ls_states.index('US')))
 
-all_metrics = {
+dc_metrics = {
     'cases':'case_total',
     'deaths':'out_death',
     'severe cases':'out_severe',
@@ -25,65 +24,73 @@ all_metrics = {
     'case death rate':'case_death_rate',
     'severe case death rate':'severe_death_rate'
     }
+ls_time_pts = sorted(df_s.month.dropna().unique())
+dc_time_pts = { k : v for k, v in enumerate(ls_time_pts)}
+dc_time_marks = { k : {'label': str(v)[0:-3] if k%3==0 else '', 'style':{}} for k, v in enumerate(ls_time_pts)}
 
 # default options
 curr_state = 'US'
 curr_metric1 = 'cases'
 curr_metric2 = 'deaths'
 curr_metric3 = 'cases'
+curr_time_pt = min(dc_time_pts.keys())
 
 #### PAGE LAYOUT ####
 # time series plot
 card_time_series = dbc.Card([
-    dbc.Row(dbc.Col(html.H2('Time series plot for disease metrics'))),
+    dbc.Row(dbc.Col(html.H3('Time, locatoin vs disease spread and severity'))),
     dbc.Row([
         # state selector
         dbc.Col([
-            dbc.Label('State:'),
+            html.Div('State'),
             dcc.Dropdown(
-                id='state-select',
-                options=[{'label':k,'value':k} for k in all_states],
+                id='dpdn-state-select',
+                options=[{'label':k,'value':k} for k in ls_states],
                 value=curr_state
             )
         ]),
         # metric 1 selector
         dbc.Col([
-            dbc.Label('Metric1:'),
+            html.Div('Metric1'),
             dcc.Dropdown(
-                id='metric1-select',
-                options=[{'label':k,'value':k} for k in all_metrics.keys()],
+                id='dpdn-metric1-select',
+                options=[{'label':k,'value':k} for k in dc_metrics.keys()],
                 value=curr_metric1
             )
         ]),
         # metric 2 selector
         dbc.Col([
-            dbc.Label('Metric2:'),
+            html.Div('Metric2'),
             dcc.Dropdown(
-                id='metric2-select',
-                options=[{'label':k,'value':k} for k in all_metrics.keys()],
+                id='dpdn-metric2-select',
+                options=[{'label':k,'value':k} for k in dc_metrics.keys()],
                 value=curr_metric2
             )
         ]),
-        # button to submit the selected options
-        dbc.Col([
-            dbc.Button('Submit', id='btn-time-series', n_clicks=0)
-        ],align='end'),
     ]),
-    dcc.Graph(id='fig-time-series')
-    ],
-    style={"padding": "1rem 1rem"}
-)
-
-# states and county map plot
-card_map = dbc.Card([
-    dbc.Row(dbc.Col(html.H2('Map of disease metrics'))),
+    dcc.Graph(id='fig-time-series'),
+    html.P(),
     dbc.Row([
-        dbc.Label('Metric:'),
-        dcc.Dropdown(
-            id='metric3-select',
-            options=[{'label':k,'value':k} for k in all_metrics.keys()],
-            value=curr_metric1
-        )
+        dbc.Col([
+            html.Div("Time "),
+            dcc.Slider(
+                id='sldr-time-series',
+                min = min(dc_time_pts.keys()),
+                max = max(dc_time_pts.keys()),
+                step = len(dc_time_pts.keys()),
+                value=curr_time_pt,
+                marks=dc_time_marks,
+                updatemode='drag'
+            ),
+        ]),
+        dbc.Col([
+            html.Div('Metric '),
+            dcc.Dropdown(
+                id='dpdn-metric3-select',
+                options=[{'label':k,'value':k} for k in dc_metrics.keys()],
+                value=curr_metric1
+            ),
+        ], width=4),
     ]),
     dbc.Row([
         dbc.Col([
@@ -92,7 +99,11 @@ card_map = dbc.Card([
         dbc.Col([
             dcc.Graph(id='fig-county-map')
         ]),
-    ])
+    ]),
+], style={'padding': '1rem 1rem'} )
+
+# states and county map plot
+card_map = dbc.Card([
 ])
 
 # page layout
@@ -108,54 +119,57 @@ time_view = html.Div(
 # CALLBACK for time-state dropdown menus
 @app.callback(
     Output('fig-time-series', 'figure'),
-    [Input('btn-time-series', 'n_clicks')],
-    [State('state-select', 'value'),
-     State('metric1-select', 'value'),
-     State('metric2-select', 'value')]
+    [Input('dpdn-state-select', 'value'),
+     Input('dpdn-metric1-select', 'value'),
+     Input('dpdn-metric2-select', 'value')]
     )
-def gen_fig_time_series(n_clicks, a_state, metric1, metric2):
+def gen_fig_time_series(a_state, metric1, metric2):
     # set the metrics
     if (metric1==metric2 or not metric2 or not metric1 ):
         # when both the same, or one is empty
-        metrics = { all_metrics.get(metric1):metric1 }
+        metrics = { dc_metrics.get(metric1):metric1 }
     else:
         # convert to a dict with {colname:tag name} for plotter
-        metrics = { all_metrics.get(metric1):metric1, all_metrics.get(metric2):metric2}
+        metrics = { dc_metrics.get(metric1):metric1, dc_metrics.get(metric2):metric2}
     # get the plot
     return gen_state_time(df_s, a_state, metrics)
 # make selected metrics grey out in the two metric dropdowns
 def filter_metrics(val):
     '''construct a list of dict to disable option'''
     return [
-        {"label": k, "value": k, "disabled": k == val}
-        for k in all_metrics.keys()
+        {'label': k, 'value': k, 'disabled': k == val}
+        for k in dc_metrics.keys()
     ]
 # reuse filter_metrics since both dropdowns are same
 app.callback(
-    Output("metric1-select", "options"),
-    [Input("metric2-select", "value")]
+    Output('dpdn-metric1-select', 'options'),
+    [Input('dpdn-metric2-select', 'value')]
     )(filter_metrics)
 app.callback(
-    Output("metric2-select", "options"),
-    [Input("metric1-select", "value")]
+    Output('dpdn-metric2-select', 'options'),
+    [Input('dpdn-metric1-select', 'value')]
     )(filter_metrics)
 
 # CALLBACK for us-states level map
 @app.callback(
     Output('fig-state-map', 'figure'),
-    [Input('metric3-select', 'value')]
+    [Input('dpdn-metric3-select', 'value'),
+     Input('sldr-time-series', 'value')]
 )
-def gen_fig_state_map(metric3):
-    metric = [all_metrics.get(metric3),metric3]
-    return gen_state_map(df_s,metric)
+def gen_fig_state_map(metric3, month):
+    a_metric = [dc_metrics.get(metric3),metric3]
+    a_month = dc_time_pts.get(month)
+    return gen_state_map(df_s,a_metric,a_month)
 
 # CALLBACK for state-counties level map
 @app.callback(
     Output('fig-county-map', 'figure'),
-    [Input('state-select', 'value'),
-     Input('metric3-select', 'value')]
+    [Input('dpdn-state-select', 'value'),
+     Input('dpdn-metric3-select', 'value'),
+     Input('sldr-time-series', 'value')]
 )
-def gen_fig_county_map(a_state, metric3):
-    a_state_id = state_ids.get(a_state)
-    metric = [all_metrics.get(metric3),metric3]
-    return gen_county_map(df_c,a_state_id,metric)
+def gen_fig_county_map(a_state, metric3, month):
+    a_state_id = dc_state_ids.get(a_state)
+    a_month = dc_time_pts.get(month)
+    a_metric = [dc_metrics.get(metric3),metric3]
+    return gen_county_map(df_c,a_state,a_state_id,a_metric,a_month)

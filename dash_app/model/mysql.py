@@ -20,7 +20,9 @@ def get_mysql_data(uname,pwd):
     try:
         dbConn = engine.connect()
         df_s = pd.read_sql("SELECT * FROM vw_time_state_rates", dbConn)
+        df_s.month = df_s.month.astype(str)
         df_c = pd.read_sql("SELECT * FROM vw_time_county_rates", dbConn)
+        df_c.month = df_c.month.astype(str)
         df_d = pd.read_sql("SELECT * FROM vw_demo_severity",dbConn)
     except Exception as ex:
         print(ex)
