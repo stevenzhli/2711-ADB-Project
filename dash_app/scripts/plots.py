@@ -3,58 +3,76 @@ import plotly.express as px, plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 
-def get_state_map(df_s):
+def gen_state_map(df,metric):
+    '''
+    generate state level map
+    metric: list of the metric's [colname, tag name in plot]
+    '''
     # convert to string and sort for slider
-    df_s['month_str'] = df_s.month.astype(str)
-    df_s = df_s.sort_values(by="month",ignore_index=True)
-
+    df.month = df.month.astype(str)
+    df = df.sort_values(by="month",ignore_index=True)
+    # ensure fixed upper bound
+    upper = df[df['state']!='US'][metric[0]].max()
     fig = px.choropleth(
-        df_s,
+        df,
         locations='state',
         locationmode='USA-states',
-        color='case_total',
+        color=metric[0],
         color_continuous_scale=px.colors.sequential.Oranges,
-        animation_frame="month_str",
-        range_color=(0,20000),
+        animation_frame="month",
+        range_color=(0,upper),
         scope='usa',
-        labels={'case_total':'cases','month_str':'month'},
+        title=metric[1],
+        labels={metric[0]:''},
         hover_name='state',
-        hover_data={'case_total':True,'month_str':False,'state':False}
+        hover_data={metric[0]:True,'month':False,'state':False}
     )
-    fig.write_json(os.path.join('plot','state_map.json'))
+    fig.update_layout(title=dict(xanchor='center',x=0.5))
+    # fig.write_json(os.path.join('assets','plot','state_map.json'))
     return fig
 
-def get_county_map(df_c,state_id):
+def gen_county_map(df,state_id,metric):
+    '''
+    generate county level map of given state_id
+    metric: list of the metric's [colname, tag name in plot]
+    '''
+    if state_id == 0:
+        return go.Figure()
     # filter by state_id
-    df_tmp = df_c[df_c.state_id==state_id]
-    # convert to string and sort for slider
-    df_c['month_str'] = df_c.month.astype(str)
-    df_c = df_c.sort_values(by="month",ignore_index=True)
+    df_tmp = df[df.state_id==state_id]
+    # convert month to string and sort for slider
+    df_tmp.month = df_tmp.month.astype(str)
+    df_tmp = df_tmp.sort_values(by="month",ignore_index=True)
+    # ensure fixed upper bound
+    upper = df_tmp[metric[0]].max()
+
     # get county level geojson
-    area = json.load(open(os.path.join('plot','geojson',state_id+'.json')))
+    area = json.load(open(os.path.join('assets','geojson',str(state_id).zfill(2)+'.json')))
     fig = px.choropleth(
         df_tmp,
         locations='county_id',
         geojson=area,
-        color='case_total',
+        color=metric[0],
         color_continuous_scale=px.colors.sequential.Oranges,
-        animation_frame="month_str",
-        labels={'case_total':'cases','month_str':'month'},
-        range_color=(0,200),
+        animation_frame="month",
+        title=metric[1],
+        range_color=(0,upper),
         scope='usa',
         fitbounds='locations',
+        labels={metric[0]:''},
         hover_name='county',
-        hover_data={'case_total':True,'month_str':False,'county':False}
+        hover_data={metric[0]:True,'month':False,'county_id':False}
     )
-    fig.write_json(os.path.join('plot','state'+state_id+'.json'))
+    fig.update_layout(title=dict(xanchor='center',x=0.5))
+    # fig.write_json(os.path.join('assets','plot','state'+state_id+'.json'))
     return fig
 
-def gen_state_time(df_s,state_name,metrics):
-    df_tmp = df_s[df_s.state == state_name].sort_values('month')
-    fig = double_y_time_plot(df_tmp,'month',state_name,metrics)
+def gen_state_time(df,state_name,metrics):
+    df_tmp = df[df.state == state_name].sort_values('month')
+    fig = __double_y_time_plot(df_tmp,'month',state_name,metrics)
     return fig
 
-def double_y_time_plot(df, time, location, metrics):
+def __double_y_time_plot(df, time, location, metrics):
     """
     take a df and generate double-y axis multi-plot for a location
     handles if single metric is provided
