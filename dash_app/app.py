@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from server import app
 from views.time import time_view
-from views.demo import demo_view
+# from views.demo import demo_view
 
 # styling options
 card_style = {
@@ -41,6 +41,12 @@ card_page_header = dbc.Card([
 # app layout - use cards
 app.layout = dbc.Container([
     card_page_header,
+    html.Div(
+        id='content',
+        style={
+            'flex':'auto'
+        }
+    )
     # app_view_1.card_time_series,
     # app_view_1.card_map
 ])
@@ -53,8 +59,8 @@ app.layout = dbc.Container([
 def render_content(value):
     if value == 'time':
         return time_view
-    elif value == 'demo':
-        return demo_view
+    # elif value == 'demo':
+    #     return demo_view
 
 if __name__ == '__main__':
     app.run_server()

@@ -12,7 +12,6 @@ def get_state_map(df_s):
         df_s,
         locations='state',
         locationmode='USA-states',
-        hover_name='state',
         color='case_total',
         color_continuous_scale=px.colors.sequential.Oranges,
         animation_frame="month_str",

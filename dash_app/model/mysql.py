@@ -1,13 +1,6 @@
 import pandas as pd
 import sqlalchemy as sql
-
-def extract_unique(df,field_name):
-    """
-    extract unique values in a dataframe field to a sorted list
-    """
-    out = df[field_name].unique().tolist()
-    out.sort()
-    return out
+from scripts import utils
 
 def get_mysql_data(uname,pwd):
     hostname="localhost"
@@ -34,3 +27,6 @@ def get_mysql_data(uname,pwd):
     dbConn.close()
 
     return df_s,df_c,df_d
+
+# read in the data
+df_s,df_c,df_d = get_mysql_data('root','testpassmysql')

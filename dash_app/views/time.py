@@ -1,17 +1,14 @@
 from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from util import utils,plots
-from . import app
-
-# read in the data: state,county
-try:
-    df_s,df_c = utils.get_mysql_data('root','testpassmysql')
-except Exception as ex:
-    print(ex)
+import plotly.io
+from server import app
+from scripts.utils import extract_unique
+from model.mysql import df_s,df_c
+from scripts.plots import gen_state_time
 
 # time-series: available options
-all_states = utils.extract_unique(df_s,'state')
+all_states = extract_unique(df_s,'state')
 all_states.insert(0, all_states.pop(all_states.index('US')))
 all_metrics = {
     'cases':'case_total',
@@ -73,13 +70,21 @@ card_time_series = dbc.Card([
 card_map = dbc.Card([
     dbc.Row([
         dbc.Col([
-            dcc.Graph(id='fig-states-map',figure=plotly.io.read_json("./plot/state_map.json"))
+            dcc.Graph(id='fig-states-map',figure=plotly.io.read_json("assets/plot/state_map.json"))
         ]),
         dbc.Col([
-            dcc.Graph(id='fig-county-map',figure=plotly.io.read_json("./plot/county_map.json"))
+            dcc.Graph(id='fig-county-map',figure=plotly.io.read_json("assets/plot/county_map.json"))
         ]),
     ])
 ])
+
+# the page layout
+time_view = html.Div(
+    [
+        card_time_series,
+        card_map
+    ]
+)
 
 # callback for time-state dropdown menus
 @app.callback(
@@ -98,7 +103,7 @@ def update_fig_time_series(n_clicks, state, metric1, metric2):
     else:
         metrics = { all_metrics.get(metric1):metric1, all_metrics.get(metric2):metric2}
     # get the plot
-    return plots.gen_state_time(df_filter, curr_state, metrics)
+    return gen_state_time(df_filter, curr_state, metrics)
 
 # make selected metric grey out
 def filter_metrics(val):
