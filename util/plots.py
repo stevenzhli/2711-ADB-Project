@@ -16,7 +16,7 @@ def save_state_map(df_s):
         animation_frame="month_str",
         range_color=(0,20000),
         scope='usa')
-    fig.write_html("./plot/state_map.html")
+    fig.write_html("./plot/state_map.json")
 
 def save_county_map(df_c):
     # sort and convert to string for slider
@@ -34,7 +34,7 @@ def save_county_map(df_c):
         animation_frame="month_str",
         range_color=(0,200),
         scope='usa')
-    fig.write_html("./plot/county_map.html")
+    fig.write_html("./plot/county_map.json")
 
 def gen_state_time(df_s,location,metrics):
     df_tmp = df_s[df_s.state == location].sort_values('month')
