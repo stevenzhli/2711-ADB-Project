@@ -1,8 +1,10 @@
 import json, math
 import plotly.express as px, plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import os
 
-def save_state_map(df_s):
+def get_state_map(df_s):
+    # convert to string and sort for slider
     df_s['month_str'] = df_s.month.astype(str)
     df_s = df_s.sort_values(by="month",ignore_index=True)
 
@@ -15,30 +17,42 @@ def save_state_map(df_s):
         color_continuous_scale=px.colors.sequential.Oranges,
         animation_frame="month_str",
         range_color=(0,20000),
-        scope='usa')
-    fig.write_html("./plot/state_map.json")
+        scope='usa',
+        labels={'case_total':'cases','month_str':'month'},
+        hover_name='state',
+        hover_data={'case_total':True,'month_str':False,'state':False}
+    )
+    fig.write_json(os.path.join('plot','state_map.json'))
+    return fig
 
-def save_county_map(df_c):
-    # sort and convert to string for slider
+def get_county_map(df_c,state_id):
+    # filter by state_id
+    df_tmp = df_c[df_c.state_id==state_id]
+    # convert to string and sort for slider
     df_c['month_str'] = df_c.month.astype(str)
     df_c = df_c.sort_values(by="month",ignore_index=True)
-
-    counties = json.load(open('./plot/geojson-counties-fips.json'))
+    # get county level geojson
+    area = json.load(open(os.path.join('plot','geojson',state_id+'.json')))
     fig = px.choropleth(
-        df_c,
+        df_tmp,
         locations='county_id',
-        geojson=counties,
-        hover_name='county',
+        geojson=area,
         color='case_total',
         color_continuous_scale=px.colors.sequential.Oranges,
         animation_frame="month_str",
+        labels={'case_total':'cases','month_str':'month'},
         range_color=(0,200),
-        scope='usa')
-    fig.write_html("./plot/county_map.json")
+        scope='usa',
+        fitbounds='locations',
+        hover_name='county',
+        hover_data={'case_total':True,'month_str':False,'county':False}
+    )
+    fig.write_json(os.path.join('plot','state'+state_id+'.json'))
+    return fig
 
-def gen_state_time(df_s,location,metrics):
-    df_tmp = df_s[df_s.state == location].sort_values('month')
-    fig = double_y_time_plot(df_tmp,'month',location,metrics)
+def gen_state_time(df_s,state_name,metrics):
+    df_tmp = df_s[df_s.state == state_name].sort_values('month')
+    fig = double_y_time_plot(df_tmp,'month',state_name,metrics)
     return fig
 
 def double_y_time_plot(df, time, location, metrics):
