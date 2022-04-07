@@ -39,6 +39,16 @@ curr_time_pt = min(dc_time_pts.keys())
 card_time_series = dbc.Card([
     dbc.Row(dbc.Col(html.H3('Time, locatoin vs disease spread and severity'))),
     dbc.Row([
+        # metric 1 selector
+        html.H4('Time series plot'),
+        dbc.Col([
+            html.Div('metric 1 (left y-axis)'),
+            dcc.Dropdown(
+                id='dpdn-metric1-select',
+                options=[{'label':k,'value':k} for k in dc_metrics.keys()],
+                value=curr_metric1
+            )
+        ]),
         # state selector
         dbc.Col([
             html.B('location'),
@@ -48,19 +58,9 @@ card_time_series = dbc.Card([
                 value=curr_state
             )
         ]),
-        # metric 1 selector
-        html.H4('Time series plot'),
-        dbc.Col([
-            html.Div('metric 1 (blue line)'),
-            dcc.Dropdown(
-                id='dpdn-metric1-select',
-                options=[{'label':k,'value':k} for k in dc_metrics.keys()],
-                value=curr_metric1
-            )
-        ]),
         # metric 2 selector
         dbc.Col([
-            html.Div('metric 2 (red dash)'),
+            html.Div('metric 2 (right axis)'),
             dcc.Dropdown(
                 id='dpdn-metric2-select',
                 options=[{'label':k,'value':k} for k in dc_metrics.keys()],

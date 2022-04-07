@@ -25,7 +25,8 @@ def gen_demogr_bar(df, dims, metric):
             data_frame=df_tmp,
             y=real_dims[0],
             x=metric,
-            barmode='group'
+            barmode='group',
+            template='ggplot2'
         )
     elif n_dims == 2:
         fig = px.bar(
@@ -33,7 +34,8 @@ def gen_demogr_bar(df, dims, metric):
             y=real_dims[0],
             x=metric,
             color=real_dims[1],
-            barmode='group'
+            barmode='group',
+            template='ggplot2'
         )
     elif n_dims == 3:
         fig = px.bar(
@@ -42,7 +44,8 @@ def gen_demogr_bar(df, dims, metric):
             x=metric,
             color=real_dims[1],
             facet_col=real_dims[2],
-            barmode='group'
+            barmode='group',
+            template='ggplot2'
         )
     fig.update_layout(xaxis_title=None,margin=dict(l=10,r=10,t=50,b=10))
     return fig
@@ -61,10 +64,10 @@ def gen_state_map(df,metric,month):
         locations='state',
         locationmode='USA-states',
         color=metric[0],
-        color_continuous_scale=px.colors.sequential.Oranges,
+        color_continuous_scale=px.colors.sequential.Pinkyl,
         range_color=(0,upper),
         scope='usa',
-        title="US "+metric[1],
+        title="state level "+metric[1],
         labels={metric[0]:''},
         hover_name='state',
         hover_data={metric[0]:True,'month':False,'state':False}
@@ -94,8 +97,8 @@ def gen_county_map(df,state,state_id,metric,month):
         locations='county_id',
         geojson=area,
         color=metric[0],
-        color_continuous_scale=px.colors.sequential.Oranges,
-        title=state+" "+metric[1],
+        color_continuous_scale=px.colors.sequential.Pinkyl,
+        title=state+" county level "+metric[1],
         range_color=(0,upper),
         scope='usa',
         fitbounds='locations',
@@ -144,6 +147,7 @@ def __double_y_time_plot(df, time, location, metrics):
     )
     # place legend at top
     fig.update_layout(
+        template='none',
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -152,8 +156,7 @@ def __double_y_time_plot(df, time, location, metrics):
         ),
         yaxis=dict(
             autorange=True
-        ),
-        margin=dict(l=10,r=10,t=50,b=10)
+        )
     )
     if(len(metrics)==1):
         return fig

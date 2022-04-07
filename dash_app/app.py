@@ -11,7 +11,7 @@ card_style = {
 
 # page header
 card_page_header = dbc.Card([
-    html.H1('COVID-19 Case Surveillance Data Warehouse'),
+    html.H2('COVID-19 Case Surveillance Data Warehouse'),
     html.Hr(),
     dbc.Row([
         dbc.Col([

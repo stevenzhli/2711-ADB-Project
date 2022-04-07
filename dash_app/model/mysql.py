@@ -26,7 +26,8 @@ def get_mysql_data(uname,pwd):
         df_d = pd.read_sql("SELECT * FROM vw_demo_severity",dbConn)
     except Exception as ex:
         print(ex)
-    dbConn.close()
+    finally:
+        dbConn.close()
 
     return df_s,df_c,df_d
 
