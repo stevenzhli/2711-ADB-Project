@@ -55,7 +55,9 @@ def Vw_time_state():
     df = pd.DataFrame(results)
     return df
 
-df_s = Vw_time_state()
-df_c = Vw_time_county()
-df_d = Vw_demo_severity()
+def get_neo4j_data():
+    df_s = Vw_time_state()
+    df_c = Vw_time_county()
+    df_d = Vw_demo_severity()
+    return df_s,df_c,df_d
 

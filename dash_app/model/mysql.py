@@ -1,6 +1,5 @@
 import pandas as pd
 import sqlalchemy as sql
-from scripts import utils
 
 def get_mysql_data(uname,pwd):
     hostname="localhost"

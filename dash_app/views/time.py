@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 # modules
 from server import app
 from model.mysql import df_s,df_c
+from model.mongo import df_s,df_c
 from scripts.utils import *
 from scripts.plots import *
 

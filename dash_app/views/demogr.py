@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 # modules
 from server import app
 from model.mysql import df_d
+from model.mongo import df_d
 from scripts.utils import *
 from scripts.plots import *
 
@@ -124,7 +125,7 @@ demogr_view = html.Div(
     State('dpdn-dim2-select', 'value'),
     State('dpdn-dim3-select', 'value'),
     State('dpdn-metric1-demo-select', 'value'))
-def gen_fig_time_series(n_clicks,dim1, dim2, dim3, metric1):
+def gen_fig(n_clicks,dim1, dim2, dim3, metric1):
     return gen_demogr_bar(df_d,[dim1,dim2,dim3],dc_metrics.get(metric1))
 
 @app.callback(
@@ -134,7 +135,7 @@ def gen_fig_time_series(n_clicks,dim1, dim2, dim3, metric1):
     State('dpdn-dim2-select', 'value'),
     State('dpdn-dim3-select', 'value'),
     State('dpdn-metric2-demo-select', 'value'))
-def gen_fig_time_series(n_clicks,dim1, dim2, dim3, metric2):
+def gen_fig(n_clicks,dim1, dim2, dim3, metric2):
     return gen_demogr_bar(df_d,[dim1,dim2,dim3],dc_metrics.get(metric2))
 
 
