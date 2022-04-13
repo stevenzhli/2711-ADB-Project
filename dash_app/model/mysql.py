@@ -1,12 +1,12 @@
 import pandas as pd
 import sqlalchemy as sql
 
-def get_mysql_data(uname,pwd):
+def get_mysql_data():
     hostname="localhost"
     port="3307" # default 3306, using 3307 for the db hosted in vm
     dbname="covid-dw"
-    uname=uname #"root"
-    pwd=pwd #"testpassmysql"
+    uname='root'
+    pwd='testpassmysql'
 
     # create mysqlalchemy engine to connect to mysql db
     engine = sql.create_engine(
@@ -27,8 +27,12 @@ def get_mysql_data(uname,pwd):
         print(ex)
     finally:
         dbConn.close()
+    df_d.race = df_d.race.fillna('Unknown')
     return df_s,df_c,df_d
 
 # read in the data
-df_s,df_c,df_d = get_mysql_data('root','testpassmysql')
+df_s,df_c,df_d = get_mysql_data()
 
+# df_s.to_hdf("cache/mysql.hdf",key='df_s',mode='a')
+# df_c.to_hdf("cache/mysql.hdf",key='df_c',mode='a')
+# df_d.to_hdf("cache/mysql.hdf",key='df_d',mode='a')
