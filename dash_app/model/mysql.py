@@ -28,8 +28,8 @@ def get_mysql_data(uname,pwd):
         print(ex)
     finally:
         dbConn.close()
-
     return df_s,df_c,df_d
 
 # read in the data
 df_s,df_c,df_d = get_mysql_data('root','testpassmysql')
+
