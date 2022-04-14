@@ -2,17 +2,10 @@ from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 # modules
 from server import app
-from model.mysql import df_d
-from model.mongo import df_d
 from scripts.utils import *
 from scripts.plots import *
 
 #### UI OPTIONS ####
-
-df_d.race = df_d.race.fillna('Unknown')
-ls_age = df_d.age.unique()
-ls_sex = df_d.sex.unique()
-ls_race = df_d.race.unique()
 
 ls_dims = ['age','sex','race']
 
@@ -120,23 +113,27 @@ demogr_view = html.Div(
 
 @app.callback(
     Output('fig-metric1', 'figure'),
-    Input('btn-metric1-plot', 'n_clicks'),
-    State('dpdn-dim1-select', 'value'),
-    State('dpdn-dim2-select', 'value'),
-    State('dpdn-dim3-select', 'value'),
-    State('dpdn-metric1-demo-select', 'value'))
-def gen_fig(n_clicks,dim1, dim2, dim3, metric1):
-    return gen_demogr_bar(df_d,[dim1,dim2,dim3],dc_metrics.get(metric1))
+    [Input('btn-metric1-plot', 'n_clicks'),
+     Input('store-df_d', 'data')],
+    [State('dpdn-dim1-select', 'value'),
+     State('dpdn-dim2-select', 'value'),
+     State('dpdn-dim3-select', 'value'),
+     State('dpdn-metric1-demo-select', 'value')]
+    )
+def gen_fig(n_clicks, df, dim1, dim2, dim3, metric1):
+    return gen_demogr_bar(df,[dim1,dim2,dim3],dc_metrics.get(metric1))
 
 @app.callback(
     Output('fig-metric2', 'figure'),
-    Input('btn-metric2-plot', 'n_clicks'),
-    State('dpdn-dim1-select', 'value'),
-    State('dpdn-dim2-select', 'value'),
-    State('dpdn-dim3-select', 'value'),
-    State('dpdn-metric2-demo-select', 'value'))
-def gen_fig(n_clicks,dim1, dim2, dim3, metric2):
-    return gen_demogr_bar(df_d,[dim1,dim2,dim3],dc_metrics.get(metric2))
+    [Input('btn-metric2-plot', 'n_clicks'),
+     Input('store-df_d', 'data')],
+    [State('dpdn-dim1-select', 'value'),
+     State('dpdn-dim2-select', 'value'),
+     State('dpdn-dim3-select', 'value'),
+     State('dpdn-metric2-demo-select', 'value')]
+     )
+def gen_fig(n_clicks, df, dim1, dim2, dim3, metric2):
+    return gen_demogr_bar(df,[dim1,dim2,dim3],dc_metrics.get(metric2))
 
 
 # make selected metrics grey out in the two metric dropdowns

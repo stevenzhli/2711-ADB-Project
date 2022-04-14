@@ -1,8 +1,12 @@
 import json, math
+from unicodedata import numeric
+from pandas import isnull
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
+
+from pymysql import NULL
 
 def gen_demogr_bar(df, dims, metric):
     # get non-empty dimensions
@@ -47,7 +51,20 @@ def gen_demogr_bar(df, dims, metric):
             barmode='group',
             template='ggplot2'
         )
-    fig.update_layout(xaxis_title=None,margin=dict(l=10,r=10,t=50,b=10))
+    fig.update_layout(
+        margin=dict(l=10,r=10,t=50,b=10),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            xanchor="auto"
+        ),
+    )
+    # make facet label without the "race=" part
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    # remove repeated x-axis titles
+    for axis in fig.layout:
+        if type(fig.layout[axis]) == go.layout.XAxis:
+            fig.layout[axis].title.text = ''
     return fig
 
 def gen_state_map(df,metric,month):
@@ -81,8 +98,6 @@ def gen_county_map(df,state,state_id,metric,month):
     generate county level map of given state_id
     metric: list of the metric's [colname, tag name in plot]
     '''
-    if state_id == 0:
-        return go.Figure()
     # filter by state_id
     df_tmp = df[df.state_id==state_id]
     # ensure fixed upper bound
@@ -92,6 +107,7 @@ def gen_county_map(df,state,state_id,metric,month):
 
     # get county level geojson
     area = json.load(open(os.path.join('assets','geojson',str(state_id).zfill(2)+'.json')))
+
     fig = px.choropleth(
         df_tmp,
         locations='county_id',
