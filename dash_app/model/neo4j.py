@@ -43,6 +43,6 @@ def get_neo4j_data():
     df_c.county_id = df_c.state_id.str.zfill(2) + df_c.county_id.str.zfill(3)
 
     df_d = df_d.astype({'case_total':'int','out_death':'int','out_severe':'int','out_total':'int'})
-    df_d.race = df_d.race.fillna('Unknown')
+    df_d.race = df_d.race.replace(r'^$','Unknown', regex=True)
 
     return df_s,df_c,df_d

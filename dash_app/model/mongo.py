@@ -29,5 +29,5 @@ def get_mongo_data():
     df_d = pd.DataFrame(list(mydb["demo_view"].find()))
     df_d.drop('_id',axis=1,inplace=True)
     df_d = df_d.astype({'case_total':'int','out_death':'int','out_severe':'int','out_total':'int'})
-    df_d.race = df_d.race.fillna('Unknown')
+    df_d.race = df_d.race.replace(r'^$','Unknown', regex=True)
     return df_s,df_c,df_d
