@@ -171,7 +171,8 @@ def __double_y_time_plot(df, time, location, metrics):
             xanchor="auto"
         ),
         yaxis=dict(
-            autorange=True
+            autorange=True,
+            fixedrange=False
         )
     )
     if(len(metrics)==1):

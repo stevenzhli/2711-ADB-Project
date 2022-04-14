@@ -29,76 +29,73 @@ curr_metric2 = 'severe case rate'
 card_demogr = dbc.Card([
     dbc.Row(dbc.Col(html.H3('Demography vs disease severity'))),
     dbc.Row([
-        # dimension 1 selector
         dbc.Col([
-            html.Div('dimension 1 (y-axix)'),
-            dcc.Dropdown(
-                id='dpdn-dim1-select',
-                options=[{'label':k,'value':k} for k in ls_dims],
-                value=curr_dim1
-            )
-        ],width=2),
-        # dimension 2 selector
-        dbc.Col([
-            html.Div('dimension 2 (color)'),
-            dcc.Dropdown(
-                id='dpdn-dim2-select',
-                options=[{'label':k,'value':k} for k in ls_dims],
-                value=curr_dim2
-            )
-        ],width=2),
-        # dimension 3 selector
-        dbc.Col([
-            html.Div('dimension 3 (facet)'),
-            dcc.Dropdown(
-                id='dpdn-dim3-select',
-                options=[{'label':k,'value':k} for k in ls_dims],
-                value=curr_dim3
-            )
-        ],width=2),
-    ]),
-    dbc.Row([
-        html.P(),
-        html.H4('Plot 1'),
-        dbc.Row([
-            # metric 1 selector
+            # dimension 1 selector
             dbc.Col([
+                html.H5('Demographic features:'),
+                html.Div('#1 (y-axix)'),
                 dcc.Dropdown(
-                    id='dpdn-metric1-demo-select',
-                    options=[{'label':k,'value':k} for k in dc_metrics.keys()],
-                    value=curr_metric1
+                    id='dpdn-dim1-select',
+                    options=[{'label':k,'value':k} for k in ls_dims],
+                    value=curr_dim1
                 ),
-            ],width=3,style=dict(display='inline-block')),
-            dbc.Col([
-                dbc.Button(
-                    'Plot',
-                    id='btn-metric1-plot',
-                    className="me-2",
-                    n_clicks=0
+                html.Div('#2 (color)'),
+                dcc.Dropdown(
+                    id='dpdn-dim2-select',
+                    options=[{'label':k,'value':k} for k in ls_dims],
+                    value=curr_dim2
+                ),
+                html.Div('#3 (facet)'),
+                dcc.Dropdown(
+                    id='dpdn-dim3-select',
+                    options=[{'label':k,'value':k} for k in ls_dims],
+                    value=curr_dim3
                 )
             ]),
-            dcc.Graph(id='fig-metric1')
-        ]),
-        html.H4('Plot 2'),
-        dbc.Row([
-            # metric 2 selector
-            dbc.Col([
-                dcc.Dropdown(
-                    id='dpdn-metric2-demo-select',
-                    options=[{'label':k,'value':k} for k in dc_metrics.keys()],
-                    value=curr_metric2
-                ),
-            ],width=3,style=dict(display='inline-block')),
-            dbc.Col([
-                dbc.Button(
-                    'Plot',
-                    id='btn-metric2-plot',
-                    className="me-2",
-                    n_clicks=0
-                )
+        ], width=2),
+        dbc.Col([
+            html.P(),
+            html.Div('metric 1'),
+            dbc.Row([
+                # metric 1 selector
+                dbc.Col([
+                    dcc.Dropdown(
+                        id='dpdn-metric1-demo-select',
+                        options=[{'label':k,'value':k} for k in dc_metrics.keys()],
+                        value=curr_metric1
+                    ),
+                ],width=3,style=dict(display='inline-block')),
+                dbc.Col([
+                    dbc.Button(
+                        'Plot',
+                        id='btn-metric1-plot',
+                        className="me-2",
+                        n_clicks=0
+                    )
+                ]),
+                dcc.Graph(id='fig-metric1')
             ]),
-            dcc.Graph(id='fig-metric2')
-        ]),
+            html.Div('metric 2'),
+            dbc.Row([
+                # metric 2 selector
+                dbc.Col([
+                    dcc.Dropdown(
+                        id='dpdn-metric2-demo-select',
+                        options=[{'label':k,'value':k} for k in dc_metrics.keys()],
+                        value=curr_metric2
+                    ),
+                ],width=3,style=dict(display='inline-block')),
+                dbc.Col([
+                    dbc.Button(
+                        'Plot',
+                        id='btn-metric2-plot',
+                        className="me-2",
+                        n_clicks=0
+                    )
+                ]),
+                dcc.Graph(id='fig-metric2')
+            ]),
+        ])
     ])
 ], style={'padding': '1rem 2rem'} )
 
