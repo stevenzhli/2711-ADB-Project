@@ -1,30 +1,31 @@
 import pandas as pd
 from py2neo import Graph
 
-session = Graph(uri="bolt://localhost:7687", auth = ("neo4j", "testpassneo4j"))
-
-def Vw_time_state():
+def Vw_time_state(session):
     query = '''MATCH(n:vw_time_state) RETURN *'''
     result = session.run(query).data()
     df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
-def Vw_time_county():
+def Vw_time_county(session):
     query = '''MATCH(n:vw_time_county) RETURN *'''
     result = session.run(query).data
     df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
-def Vw_demo_severity():
+def Vw_demo_severity(session):
     query = '''MATCH(n:vw_demo_severity) RETURN *'''
     result = session.run(query).data
     df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
 def get_neo4j_data():
-    df_s = Vw_time_state()
-    df_c = Vw_time_county()
-    df_d = Vw_demo_severity()
+
+    session = Graph(uri="bolt://localhost:7687", auth = ("neo4j", "testpassneo4j"))
+
+    df_s = Vw_time_state(session)
+    df_c = Vw_time_county(session)
+    df_d = Vw_demo_severity(session)
 
     df_s.month = df_s.month.str[0:10]
     df_s = df_s.astype({'population':'float','case_total':'float','out_death':'int','out_severe':'int','out_total':'int'})
