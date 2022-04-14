@@ -1,63 +1,47 @@
-from neo4j import GraphDatabase
 import pandas as pd
+from py2neo import Graph
 
-driver = GraphDatabase.driver(uri="bolt://localhost:7687", auth = ("neo4j", "testpassneo4j"))
+session = Graph(uri="bolt://localhost:7687", auth = ("neo4j", "testpassneo4j"))
 
-session = driver.session()
-
-def Vw_demo_severity():
-    query = '''
-        MATCH (f:fact), (d:demography{demography_id:f.demography_id})
-
-        RETURN  f.demography_id,
-            d.race,
-            d.age,
-            d.sex,
-            sum(f.case_total) as case_total,
-            sum(f.out_total) as out_total,
-            sum(f.out_severe) as out_servere,
-            sum(f.out_death) as out_death
-    '''
-    results = session.run(query)
-    df = pd.DataFrame(results)
+def Vw_time_state():
+    query = '''MATCH(n:vw_time_state) RETURN *'''
+    result = session.run(query).data()
+    df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
 def Vw_time_county():
-    query = '''
-        MATCH (f:fact), (l:location{location_id:f.location_id})
-        RETURN
-                f.month,
-                l.county_id,
-                l.state_id,
-                l.county,
-                sum(f.case_total) as case_total,
-                sum(f.out_total) as out_total,
-                sum(f.out_severe) as out_servere,
-                sum(f.out_death) as out_death
-    '''
-    results = session.run(query)
-    df = pd.DataFrame(results)
+    query = '''MATCH(n:vw_time_county) RETURN *'''
+    result = session.run(query).data
+    df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
-def Vw_time_state():
-    query = '''
-        MATCH (f:fact), (l:location{location_id:f.location_id})
-        RETURN
-                f.month,
-                l.state_id,
-                l.state,
-                sum(f.case_total) as case_total,
-                sum(f.out_total) as out_total,
-                sum(f.out_severe) as out_servere,
-                sum(f.out_death) as out_death
-    '''
-    results = session.run(query)
-    df = pd.DataFrame(results)
+def Vw_demo_severity():
+    query = '''MATCH(n:vw_demo_severity) RETURN *'''
+    result = session.run(query).data
+    df = pd.DataFrame.from_dict(dict(session.run(query).to_data_frame().n),orient='index')
     return df
 
 def get_neo4j_data():
     df_s = Vw_time_state()
     df_c = Vw_time_county()
     df_d = Vw_demo_severity()
-    return df_s,df_c,df_d
 
+    df_s.month = df_s.month.str[0:10]
+    df_s = df_s.astype({'population':'float','case_total':'float','out_death':'int','out_severe':'int','out_total':'int'})
+    df_s['pop_infect_rate'] = df_s.case_total/df_s.population
+    df_s['case_death_rate'] = df_s.out_death/df_s.out_total
+    df_s['case_severe_rate'] = df_s.out_severe/df_s.out_total
+    df_s['case_death_rate'] = df_s.out_death/df_s.out_severe
+
+    df_c.month = df_c.month.str[0:10]
+    df_c = df_c.astype({'population':'float','case_total':'float','out_death':'int','out_severe':'int','out_total':'int'})
+    df_c['pop_infect_rate'] = df_c.case_total/df_c.population
+    df_c['case_death_rate'] = df_c.out_death/df_c.out_total
+    df_c['case_severe_rate'] = df_c.out_severe/df_c.out_total
+    df_c['case_death_rate'] = df_c.out_death/df_c.out_severe
+    df_c.county_id = df_c.state_id.str.zfill(2) + df_c.county_id.str.zfill(3)
+
+    df_d = df_d.astype({'case_total':'int','out_death':'int','out_severe':'int','out_total':'int'})
+    df_d.race = df_d.race.fillna('Unknown')
+
+    return df_s,df_c,df_d

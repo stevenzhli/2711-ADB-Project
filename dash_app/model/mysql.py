@@ -27,12 +27,6 @@ def get_mysql_data():
         print(ex)
     finally:
         dbConn.close()
+    df_c.state_id = df_c.state_id.astype(str)
     df_d.race = df_d.race.fillna('Unknown')
     return df_s,df_c,df_d
-
-# read in the data
-df_s,df_c,df_d = get_mysql_data()
-
-# df_s.to_hdf("cache/mysql.hdf",key='df_s',mode='a')
-# df_c.to_hdf("cache/mysql.hdf",key='df_c',mode='a')
-# df_d.to_hdf("cache/mysql.hdf",key='df_d',mode='a')

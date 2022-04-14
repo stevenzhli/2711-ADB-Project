@@ -31,8 +31,3 @@ def get_mongo_data():
     df_d = df_d.astype({'case_total':'int','out_death':'int','out_severe':'int','out_total':'int'})
     df_d.race = df_d.race.fillna('Unknown')
     return df_s,df_c,df_d
-
-df_s,df_c,df_d = get_mongo_data()
-# df_s.to_hdf("cache/mongo.hdf",key='df_s',mode='a')
-# df_c.to_hdf("cache/mongo.hdf",key='df_c',mode='a')
-# df_d.to_hdf("cache/mongo.hdf",key='df_d',mode='a')
