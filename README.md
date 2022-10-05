@@ -6,7 +6,6 @@ This repo contains the code for the interactive dashboard web application built 
 
 Data ETL, data warehouse design and implementation related code are not included here.
 
-----
 
 ## Introduction
 
@@ -26,7 +25,6 @@ Data ETL, data warehouse design and implementation related code are not included
   - How does patient demographics affect disease severity?
     - Are specific demographic group more susceptible to severe outcomes?
 
-----
 ## Interactive Dashboard
 
 - The dashboard is built using Python and [Plotly Dash](https://plotly.com/dash/).
